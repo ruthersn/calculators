@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Savings Reality Check | Fiat vs Hard Assets</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            display: ['Outfit', 'sans-serif']
+          },
+          colors: {
+            bitcoin: '#F7931A',
+            bank: '#3B82F6',
+            stocks: '#10B981',
+            cash: '#6B7280',
+            darkbg: '#070a13',
+            cardbg: '#0f1626',
+            borderbg: '#1e293b'
+          },
+          boxShadow: {
+            'glow-bitcoin': '0 0 20px rgba(247, 147, 26, 0.15)',
+            'glow-bank': '0 0 20px rgba(59, 130, 246, 0.15)',
+            'glow-stocks': '0 0 20px rgba(16, 185, 129, 0.15)',
+            'glow-card': '0 4px 30px rgba(0, 0, 0, 0.4)'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom Scrollbar styling for table and page */
+    ::-webkit-scrollbar {
+      height: 6px;
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #070a13;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+
+    /* Custom slider styles */
+    input[type=range] {
+      accent-color: #3B82F6;
+      background: #1e293b;
+    }
+
+    input[type=range].accent-bitcoin {
+      accent-color: #F7931A;
+    }
+
+    input[type=range].accent-stocks {
+      accent-color: #10B981;
+    }
+
+    input[type=range].accent-cash {
+      accent-color: #6B7280;
+    }
+
+    /* Glow transitions */
+    .glow-transition {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Table container custom styles */
+    .table-container::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    /* Pulsing live indicator */
+    .pulse-indicator {
+      box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+      animation: pulse 1.6s infinite cubic-bezier(0.66, 0, 0, 1);
+    }
+
+    @keyframes pulse {
+      to {
+        box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+      }
+    }
+  </style>
+</head>
+
+<body class="bg-darkbg text-slate-300 font-sans antialiased pb-24 selection:bg-bitcoin/30 selection:text-white">
+
+  <!-- Live Ticker Bar -->
+  <div class="bg-slate-950 border-b border-slate-900 text-xs py-2 px-4">
+    <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-2">
+      <div class="flex items-center gap-2 text-slate-400">
+        <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 pulse-indicator"></span>
+        <span id="liveBtcLabel">Fetching live Bitcoin prices...</span>
+      </div>
+      <div class="flex items-center gap-4 text-slate-400">
+        <span>Inflation Target: <strong class="text-red-400">2.0%</strong></span>
+        <span>Actual Debasement Average: <strong class="text-red-400" id="debasementTicker">6.0%</strong></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="border-b border-slate-900 bg-slate-950/80 sticky top-0 z-50 backdrop-blur-md shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="p-2 bg-gradient-to-tr from-bitcoin to-amber-500 rounded-xl shadow-md">
+          <i data-lucide="scale" class="w-6 h-6 text-white"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-extrabold text-white tracking-tight font-display flex items-center gap-2">
+            The Savings Reality Check
+          </h1>
+          <p class="text-xs text-slate-400">Inflation, Interest Rates, Hard Money, and Real Wealth</p>
+        </div>
+      </div>
+
+      <!-- Currency Selector & Global Options -->
+      <div class="flex items-center gap-3 bg-slate-900 p-1 rounded-xl border border-slate-800">
+        <button onclick="setCurrency('GBP')" id="btn-GBP" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-slate-800 text-white border border-slate-700">GBP (£)</button>
+        <button onclick="setCurrency('USD')" id="btn-USD" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-400 hover:text-slate-200">USD ($)</button>
+        <button onclick="setCurrency('EUR')" id="btn-EUR" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-400 hover:text-slate-200">EUR (€)</button>
+        <button onclick="setCurrency('AUD')" id="btn-AUD" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-400 hover:text-slate-200">AUD ($)</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+    <!-- Intro / Hero Section -->
+    <section class="text-center max-w-3xl mx-auto space-y-4 mb-4">
+      <span class="px-3 py-1 rounded-full bg-bitcoin/10 text-bitcoin text-xs font-bold tracking-wide uppercase border border-bitcoin/20">
+        Why cash savings are losing the race
+      </span>
+      <h2 class="text-3xl sm:text-4xl font-extrabold text-white font-display tracking-tight leading-tight">
+        The "Safe Savings" Paradox
+      </h2>
+      <p class="text-slate-400 text-base leading-relaxed">
+        Holding fiat cash yields the illusion of safety. While nominal numbers in your bank stay the same or grow slightly,
+        inflation and monetary expansion silently dilute your purchasing power. Compare how various strategies perform against debasement.
+      </p>
+    </section>
+
+    <!-- Educational Grid -->
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <!-- Card 1: Debasement -->
+      <div class="bg-cardbg rounded-2xl p-6 border border-slate-800/80 shadow-lg hover:border-red-500/30 hover:shadow-red-500/5 glow-transition group">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="p-2.5 bg-red-500/10 rounded-xl border border-red-500/20 group-hover:bg-red-500/20 glow-transition">
+            <i data-lucide="trending-down" class="w-5 h-5 text-red-400"></i>
+          </div>
+          <h3 class="text-lg font-bold text-white font-display">1. The Debasement Tax</h3>
+        </div>
+        <p class="text-slate-400 text-sm leading-relaxed">
+          When money supply expands, your local currency units are diluted. Standard consumer price inflation measures are often backward-looking, masking the true rate of asset and food price inflation.
+        </p>
+      </div>
+
+      <!-- Card 2: The ISA Illusion -->
+      <div class="bg-cardbg rounded-2xl p-6 border border-slate-800/80 shadow-lg hover:border-bank/30 hover:shadow-bank/5 glow-transition group">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="p-2.5 bg-bank/10 rounded-xl border border-bank/20 group-hover:bg-bank/20 glow-transition">
+            <i data-lucide="piggy-bank" class="w-5 h-5 text-bank"></i>
+          </div>
+          <h3 class="text-lg font-bold text-white font-display">2. The Real Yield Trap</h3>
+        </div>
+        <p class="text-slate-400 text-sm leading-relaxed">
+          If a Cash ISA pays 4% interest, but actual debasement is 6%, your <strong>real purchasing power</strong> is shrinking by 2% yearly. Your nominal balance goes up, but your capital buys fewer real-world assets.
+        </p>
+      </div>
+
+      <!-- Card 3: Hard Money -->
+      <div class="bg-cardbg rounded-2xl p-6 border border-slate-800/80 shadow-lg hover:border-bitcoin/30 hover:shadow-bitcoin/5 glow-transition group">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="p-2.5 bg-bitcoin/10 rounded-xl border border-bitcoin/20 group-hover:bg-bitcoin/20 glow-transition">
+            <i data-lucide="shield-check" class="w-5 h-5 text-bitcoin"></i>
+          </div>
+          <h3 class="text-lg font-bold text-white font-display">3. The Hard Money Solution</h3>
+        </div>
+        <p class="text-slate-400 text-sm leading-relaxed">
+          Assets with an absolute or hard cap (like Bitcoin or prime real estate) cannot be arbitrarily diluted by central planning. Over time, scarce assets absorb global liquidity expansion, protecting your wealth.
+        </p>
+      </div>
+    </section>
+
+    <!-- Interactive Jargon Buster -->
+    <section class="bg-cardbg rounded-2xl border border-slate-800/80 p-6 shadow-lg space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+        <div class="flex items-center gap-3">
+          <div class="p-2.5 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
+            <i data-lucide="book-open" class="w-5 h-5 text-emerald-400"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-white font-display">Jargon Buster: Simplified Finance</h3>
+            <p class="text-xs text-slate-400">A plain-English guide to terms and analogies</p>
+          </div>
+        </div>
+        <span class="text-[10px] bg-slate-800 text-slate-400 px-2.5 py-1 rounded-lg font-bold uppercase tracking-wider self-start sm:self-center">Non-Financial Friendly 💡</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Term 1: Inflation -->
+        <div class="bg-slate-900/40 p-4 rounded-xl border border-slate-800/60 space-y-2">
+          <h4 class="font-bold text-white text-sm flex items-center gap-2 font-display">
+            <span class="w-2 h-2 rounded-full bg-red-400"></span> Inflation (Monetary Debasement)
+          </h4>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            <strong class="text-slate-300">Analogy: The Leaking Bucket.</strong> If your savings are water, inflation is a steady leak in the bucket. It represents the speed at which central banks increase the currency supply, diluting the value of every dollar or pound you hold. Prices do not just "go up"; the currency itself gets weaker.
+          </p>
+        </div>
+
+        <!-- Term 2: Purchasing Power -->
+        <div class="bg-slate-900/40 p-4 rounded-xl border border-slate-800/60 space-y-2">
+          <h4 class="font-bold text-white text-sm flex items-center gap-2 font-display">
+            <span class="w-2 h-2 rounded-full bg-amber-400"></span> Purchasing Power
+          </h4>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            <strong class="text-slate-300">Analogy: The Loaf of Bread Test.</strong> The true value of your money is not the number printed on the bill, but what it can buy. Purchasing Power measures how many real goods (like loaves of bread) you can buy. If your cash savings stay static while bread prices double, your purchasing power has been cut in half.
+          </p>
+        </div>
+
+        <!-- Term 3: Nominal vs Real Balance -->
+        <div class="bg-slate-900/40 p-4 rounded-xl border border-slate-800/60 space-y-2">
+          <h4 class="font-bold text-white text-sm flex items-center gap-2 font-display">
+            <span class="w-2 h-2 rounded-full bg-bank"></span> Nominal vs. Real (The Savings Illusion)
+          </h4>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            <strong class="text-slate-300">Nominal</strong> is the raw "number" of currency units shown on your bank statement (e.g., $10,000). <strong class="text-slate-300">Real</strong> is the actual purchasing power adjusted for inflation. The "Savings Illusion" occurs when you feel richer because your bank balance grows, while its actual purchasing power is decaying.
+          </p>
+        </div>
+
+        <!-- Term 4: Real Yield & AER/CAGR -->
+        <div class="bg-slate-900/40 p-4 rounded-xl border border-slate-800/60 space-y-2">
+          <h4 class="font-bold text-white text-sm flex items-center gap-2 font-display">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Real Yield & Rates (AER/CAGR)
+          </h4>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            <strong class="text-slate-300">Real Yield = Interest Rate minus Inflation.</strong> If a savings account pays 4% interest but inflation runs at 6%, your real yield is -2%. <strong class="text-slate-300">AER</strong> is the annual bank interest rate. <strong class="text-slate-300">CAGR</strong> is the smoothed average annual growth rate of assets like stocks or Bitcoin.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- MAIN INTERACTIVE CONTAINER -->
+    <div class="bg-slate-950/50 rounded-3xl border border-slate-900 p-6 lg:p-8 space-y-8">
+
+      <!-- GLOBAL CONTROLS PANEL -->
+      <div class="bg-cardbg rounded-2xl border border-slate-800 p-6 shadow-glow-card">
+        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-6 flex items-center gap-2">
+          <i data-lucide="sliders" class="w-4 h-4 text-bank"></i> Global Scenario Parameters
+        </h3>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <!-- Initial Deposit Input -->
+          <div class="space-y-3">
+            <div class="flex justify-between items-center">
+              <label for="capitalAmount" class="text-sm font-medium text-slate-300">Starting Capital</label>
+              <div class="flex items-center bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 w-32 focus-within:border-bank/50">
+                <span class="text-slate-500 text-sm mr-1 currency-symbol">£</span>
+                <input type="number" id="capitalAmount" min="100" max="1000000" value="10000" class="bg-transparent text-white text-sm font-bold focus:outline-none w-full text-right">
+              </div>
+            </div>
+            <input type="range" id="capitalSlider" min="1000" max="250000" step="1000" value="10000" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-bank">
+            <div class="flex justify-between text-[10px] text-slate-500 font-semibold uppercase">
+              <span>Min: <span class="currency-symbol">£</span>1k</span>
+              <span>Max: <span class="currency-symbol">£</span>250k</span>
+            </div>
+          </div>
+
+          <!-- Inflation Rate Input -->
+          <div class="space-y-3">
+            <div class="flex justify-between items-center">
+              <label for="inflationRate" class="text-sm font-medium text-slate-300">Annual Inflation (Real Debasement)</label>
+              <div class="flex items-center bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 w-20 focus-within:border-red-500/50">
+                <input type="number" id="inflationRate" min="0.5" max="25" step="0.5" value="6" class="bg-transparent text-white text-sm font-bold focus:outline-none w-full text-right">
+                <span class="text-red-400 text-sm ml-0.5">%</span>
+              </div>
+            </div>
+            <input type="range" id="inflationSlider" min="0.5" max="20" step="0.5" value="6" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-red-500">
+            <div class="flex justify-between text-[10px] text-slate-500 font-semibold uppercase">
+              <span class="text-slate-500">Low Target (2%)</span>
+              <span class="text-red-400 font-bold">Severe (20%)</span>
+            </div>
+          </div>
+
+          <!-- Time Horizon Selector -->
+          <div class="space-y-3">
+            <label class="block text-sm font-medium text-slate-300">Time Horizon</label>
+            <div class="grid grid-cols-4 gap-2 bg-slate-900/80 p-1.5 rounded-xl border border-slate-800">
+              <button onclick="setTimeHorizon(5)" id="horizon-5" class="py-2 text-xs font-bold rounded-lg transition-all text-slate-400 hover:text-white hover:bg-slate-800/50">5 Yrs</button>
+              <button onclick="setTimeHorizon(10)" id="horizon-10" class="py-2 text-xs font-bold rounded-lg transition-all bg-slate-800 text-white border border-slate-700 shadow">10 Yrs</button>
+              <button onclick="setTimeHorizon(15)" id="horizon-15" class="py-2 text-xs font-bold rounded-lg transition-all text-slate-400 hover:text-white hover:bg-slate-800/50">15 Yrs</button>
+              <button onclick="setTimeHorizon(20)" id="horizon-20" class="py-2 text-xs font-bold rounded-lg transition-all text-slate-400 hover:text-white hover:bg-slate-800/50">20 Yrs</button>
+            </div>
+            <div class="text-[10px] text-slate-500 font-semibold text-center uppercase">
+              Select compound compounding period
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STRATEGY RATES CONFIGURATOR -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <!-- Card B: Bank Savings -->
+        <div class="bg-cardbg/90 rounded-2xl p-5 border border-slate-800 hover:border-bank/30 shadow-lg glow-transition relative overflow-hidden">
+          <div class="absolute top-0 left-0 right-0 h-[2px] bg-bank/30"></div>
+          <div class="flex justify-between items-start mb-4">
+            <div class="flex items-center gap-2.5">
+              <div class="p-2 bg-bank/10 rounded-lg">
+                <i data-lucide="landmark" class="w-4 h-4 text-bank"></i>
+              </div>
+              <h4 class="font-bold text-white text-sm font-display">Savings Account / ISA</h4>
+            </div>
+            <span id="bankRateLabel" class="text-sm font-extrabold text-bank bg-bank/10 px-2.5 py-0.5 rounded-lg">4.0% AER</span>
+          </div>
+          <p class="text-xs text-slate-400 leading-relaxed mb-4">Standard cash savings. Interest compounds nominal balance but is fully exposed to inflation.</p>
+          <input type="range" id="bankRateSlider" min="0" max="10" step="0.1" value="4" class="w-full h-1.5 accent-bank cursor-pointer">
+        </div>
+
+        <!-- Card C: Stocks Index -->
+        <div class="bg-cardbg/90 rounded-2xl p-5 border border-slate-800 hover:border-stocks/30 shadow-lg glow-transition relative overflow-hidden">
+          <div class="absolute top-0 left-0 right-0 h-[2px] bg-stocks/30"></div>
+          <div class="flex justify-between items-start mb-4">
+            <div class="flex items-center gap-2.5">
+              <div class="p-2 bg-stocks/10 rounded-lg">
+                <i data-lucide="trending-up" class="w-4 h-4 text-stocks"></i>
+              </div>
+              <h4 class="font-bold text-white text-sm font-display">Index Fund (S&P 500)</h4>
+            </div>
+            <span id="stocksRateLabel" class="text-sm font-extrabold text-stocks bg-stocks/10 px-2.5 py-0.5 rounded-lg">8.0% CAGR</span>
+          </div>
+          <p class="text-xs text-slate-400 leading-relaxed mb-4">Broad stock market indexing. Traditionally beats base inflation but volatile in short timelines.</p>
+          <input type="range" id="stocksRateSlider" min="0" max="15" step="0.5" value="8" class="w-full h-1.5 accent-stocks cursor-pointer">
+        </div>
+
+        <!-- Card D: Hard Asset / Bitcoin -->
+        <div class="bg-cardbg/90 rounded-2xl p-5 border border-slate-800 hover:border-bitcoin/30 shadow-lg glow-transition relative overflow-hidden">
+          <div class="absolute top-0 left-0 right-0 h-[2px] bg-bitcoin/30"></div>
+          <div class="flex justify-between items-start mb-4">
+            <div class="flex items-center gap-2.5">
+              <div class="p-2 bg-bitcoin/10 rounded-lg">
+                <i data-lucide="bitcoin" class="w-4 h-4 text-bitcoin"></i>
+              </div>
+              <h4 class="font-bold text-white text-sm font-display">Bitcoin (Hard Money)</h4>
+            </div>
+            <span id="btcRateLabel" class="text-sm font-extrabold text-bitcoin bg-bitcoin/10 px-2.5 py-0.5 rounded-lg">25.0% CAGR</span>
+          </div>
+          <p class="text-xs text-slate-400 leading-relaxed mb-4">Absolute hard supply cap. High structural volatility, but historically outpaces paper debasement.</p>
+          <input type="range" id="btcRateSlider" min="0" max="80" step="1" value="25" class="w-full h-1.5 accent-bitcoin cursor-pointer">
+        </div>
+      </div>
+
+      <!-- HIGH FIDELITY CHART SECTION -->
+      <div class="bg-cardbg rounded-2xl border border-slate-800 p-6 shadow-glow-card relative overflow-hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <h3 class="font-extrabold text-white text-lg font-display">Visualizing Compounding Erosion</h3>
+            <p class="text-xs text-slate-400">See the gap widen over time between paper savings, investments, and hard money</p>
+          </div>
+          
+          <!-- Chart Mode Selector Toggle -->
+          <div class="flex items-center gap-1 bg-slate-900 border border-slate-800 rounded-xl p-1 select-none self-start sm:self-center">
+            <button onclick="setChartMode('real')" id="chart-btn-real" class="px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all bg-slate-800 text-white border border-slate-700 shadow">
+              Purchasing Power (Real Value)
+            </button>
+            <button onclick="setChartMode('nominal')" id="chart-btn-nominal" class="px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all text-slate-400 hover:text-slate-200">
+              Nominal Balance (Illusion)
+            </button>
+          </div>
+        </div>
+
+        <!-- Chart Canvas -->
+        <div class="h-96 w-full relative">
+          <canvas id="savingsChart"></canvas>
+        </div>
+      </div>
+
+      <!-- BREAD BOX VISUALIZER (INTERACTIVE SANDBOX) -->
+      <div class="bg-cardbg rounded-2xl border border-slate-800 p-6 shadow-glow-card">
+        <div class="text-center max-w-xl mx-auto mb-6">
+          <span class="text-xs font-extrabold tracking-widest text-bitcoin uppercase bg-bitcoin/10 px-2.5 py-1 rounded-full">Real Goods Equivalent</span>
+          <h3 class="font-extrabold text-white text-lg font-display mt-2">The Loaf of Bread Test</h3>
+          <p class="text-xs text-slate-400">Click a year to see what your initial capital can buy. Dilution visually explained.</p>
+        </div>
+
+        <!-- Timeline Slider -->
+        <div class="max-w-xl mx-auto mb-8">
+          <div class="flex justify-between text-xs font-bold text-slate-400 px-2 mb-2">
+            <span>Today (Year 0)</span>
+            <span>Year <span id="sandboxSelectedYearLabel">5</span></span>
+            <span>End Horizon</span>
+          </div>
+          <input type="range" id="sandboxYearSlider" min="0" max="10" value="5" class="w-full h-2 bg-slate-900 rounded-lg appearance-none accent-bitcoin cursor-pointer">
+          <div class="flex justify-between text-[10px] text-slate-500 px-1 mt-1" id="sandboxTickMarks">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- Visual Sandbox Display -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          
+          <!-- Cash Mattress -->
+          <div class="bg-slate-950/80 rounded-xl p-4 border border-slate-900 flex flex-col justify-between">
+            <div class="space-y-1">
+              <div class="flex items-center gap-2 text-slate-400 text-xs font-bold uppercase">
+                <i data-lucide="inbox" class="w-3.5 h-3.5"></i> Cash Mattress
+              </div>
+              <div class="text-lg font-extrabold text-slate-300 font-display mt-1" id="sandboxCashVal">£10,000</div>
+              <div class="text-[11px] text-red-400 font-semibold flex items-center" id="sandboxCashLoss">
+                Loss: -26.2%
+              </div>
+            </div>
+            <div class="border-t border-slate-900 mt-4 pt-3 space-y-2">
+              <div class="text-xs text-slate-400 flex justify-between">
+                <span>Loaf Price:</span>
+                <span id="sandboxCashBreadPrice">£2.01</span>
+              </div>
+              <div class="flex items-center justify-between font-extrabold text-slate-200 text-sm bg-slate-900/50 p-2 rounded-lg">
+                <span class="flex items-center gap-1.5">🍞 Loaves:</span>
+                <span id="sandboxCashBreadCount" class="text-red-400">4,975</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Savings Account -->
+          <div class="bg-slate-950/80 rounded-xl p-4 border border-slate-900 flex flex-col justify-between">
+            <div class="space-y-1">
+              <div class="flex items-center gap-2 text-bank text-xs font-bold uppercase">
+                <i data-lucide="landmark" class="w-3.5 h-3.5"></i> Bank Savings
+              </div>
+              <div class="text-lg font-extrabold text-white font-display mt-1" id="sandboxBankVal">£10,000</div>
+              <div class="text-[11px] text-slate-400 font-semibold flex items-center" id="sandboxBankReal">
+                Real PP: £9,092 <span class="text-red-400 ml-1">-9.1%</span>
+              </div>
+            </div>
+            <div class="border-t border-slate-900 mt-4 pt-3 space-y-2">
+              <div class="text-xs text-slate-400 flex justify-between">
+                <span>Nominal Bal:</span>
+                <span id="sandboxBankNominal">£12,167</span>
+              </div>
+              <div class="flex items-center justify-between font-extrabold text-slate-200 text-sm bg-bank/5 border border-bank/10 p-2 rounded-lg">
+                <span class="flex items-center gap-1.5">🍞 Loaves:</span>
+                <span id="sandboxBankBreadCount" class="text-red-300">6,061</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Index Fund -->
+          <div class="bg-slate-950/80 rounded-xl p-4 border border-slate-900 flex flex-col justify-between">
+            <div class="space-y-1">
+              <div class="flex items-center gap-2 text-stocks text-xs font-bold uppercase">
+                <i data-lucide="trending-up" class="w-3.5 h-3.5"></i> Index Fund
+              </div>
+              <div class="text-lg font-extrabold text-white font-display mt-1" id="sandboxStocksVal">£10,000</div>
+              <div class="text-[11px] text-slate-400 font-semibold flex items-center" id="sandboxStocksReal">
+                Real PP: £10,989 <span class="text-emerald-400 ml-1">+9.9%</span>
+              </div>
+            </div>
+            <div class="border-t border-slate-900 mt-4 pt-3 space-y-2">
+              <div class="text-xs text-slate-400 flex justify-between">
+                <span>Nominal Bal:</span>
+                <span id="sandboxStocksNominal">£14,693</span>
+              </div>
+              <div class="flex items-center justify-between font-extrabold text-slate-200 text-sm bg-stocks/5 border border-stocks/10 p-2 rounded-lg">
+                <span class="flex items-center gap-1.5">🍞 Loaves:</span>
+                <span id="sandboxStocksBreadCount" class="text-emerald-400">7,326</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bitcoin -->
+          <div class="bg-slate-950/80 rounded-xl p-4 border border-slate-900 flex flex-col justify-between">
+            <div class="space-y-1">
+              <div class="flex items-center gap-2 text-bitcoin text-xs font-bold uppercase">
+                <i data-lucide="bitcoin" class="w-3.5 h-3.5"></i> Bitcoin (Scarcity)
+              </div>
+              <div class="text-lg font-extrabold text-white font-display mt-1" id="sandboxBtcVal">£10,000</div>
+              <div class="text-[11px] text-slate-400 font-semibold flex items-center" id="sandboxBtcReal">
+                Real PP: £22,805 <span class="text-emerald-400 ml-1">+128%</span>
+              </div>
+            </div>
+            <div class="border-t border-slate-900 mt-4 pt-3 space-y-2">
+              <div class="text-xs text-slate-400 flex justify-between">
+                <span>Nominal Bal:</span>
+                <span id="sandboxBtcNominal">£30,517</span>
+              </div>
+              <div class="flex items-center justify-between font-extrabold text-slate-200 text-sm bg-bitcoin/5 border border-bitcoin/10 p-2 rounded-lg">
+                <span class="flex items-center gap-1.5">🍞 Loaves:</span>
+                <span id="sandboxBtcBreadCount" class="text-bitcoin font-extrabold">15,203</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- UNIFIED COMPARATIVE DATA TABLE -->
+      <div class="bg-cardbg rounded-2xl border border-slate-800 p-6 shadow-glow-card">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <h3 class="font-extrabold text-white text-lg font-display">Performance Matrix</h3>
+            <p class="text-xs text-slate-400">Year-by-year comparison of nominal vs purchasing power across strategies</p>
+          </div>
+        </div>
+
+        <div class="table-container overflow-x-auto rounded-xl border border-slate-800 bg-slate-950/80">
+          <table class="w-full text-left text-xs whitespace-nowrap">
+            <thead>
+              <tr class="bg-slate-900 text-slate-400 border-b border-slate-800 uppercase tracking-wider font-bold">
+                <th class="px-4 py-4 sticky left-0 bg-slate-900 z-25 w-16 border-r border-slate-800">Year</th>
+                <th class="px-4 py-4 bg-slate-950/40" colspan="2">💼 Cash Mattress (0% Yield)</th>
+                <th class="px-4 py-4 bg-bank/5 border-l border-slate-800" colspan="2">🏦 Savings Account / Cash ISA</th>
+                <th class="px-4 py-4 bg-stocks/5 border-l border-slate-800" colspan="2">📈 Index Fund (S&P 500)</th>
+                <th class="px-4 py-4 bg-bitcoin/5 border-l border-slate-800" colspan="2">₿ Bitcoin (Hard Money)</th>
+              </tr>
+              <tr class="bg-slate-900/70 text-slate-400 border-b border-slate-800 font-semibold">
+                <th class="px-4 py-2 sticky left-0 bg-slate-900 z-25 border-r border-slate-800"></th>
+                <!-- Mattress -->
+                <th class="px-4 py-2 bg-slate-950/20">Real PP</th>
+                <th class="px-4 py-2 bg-slate-950/20 border-r border-slate-800/50">🍞 loaves</th>
+                <!-- Bank -->
+                <th class="px-4 py-2 bg-bank/5">Nominal</th>
+                <th class="px-4 py-2 bg-bank/5 border-r border-slate-800/50">Real PP & 🍞</th>
+                <!-- Stocks -->
+                <th class="px-4 py-2 bg-stocks/5">Nominal</th>
+                <th class="px-4 py-2 bg-stocks/5 border-r border-slate-800/50">Real PP & 🍞</th>
+                <!-- BTC -->
+                <th class="px-4 py-2 bg-bitcoin/5">Nominal</th>
+                <th class="px-4 py-2 bg-bitcoin/5">Real PP & 🍞</th>
+              </tr>
+            </thead>
+            <tbody id="comparisonTableBody" class="divide-y divide-slate-800/40 font-medium">
+              <!-- Dynamic Rows -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    // Currency Configs
+    const CURRENCIES = {
+      GBP: { symbol: '£', locale: 'en-GB', breadDefault: 1.50, btcGecko: 'gbp' },
+      USD: { symbol: '$', locale: 'en-US', breadDefault: 2.50, btcGecko: 'usd' },
+      EUR: { symbol: '€', locale: 'de-DE', breadDefault: 2.00, btcGecko: 'eur' },
+      AUD: { symbol: '$', locale: 'en-AU', breadDefault: 3.00, btcGecko: 'aud' }
+    };
+
+    // State
+    let activeCurrency = 'GBP';
+    let horizonYears = 10;
+    let baseCapital = 10000;
+    let annualInflation = 0.06; // 6.0%
+    let bankRate = 0.04; // 4% AER
+    let stocksRate = 0.08; // 8% CAGR
+    let btcRate = 0.25; // 25% CAGR
+    let activeChartMode = 'real'; // 'real' or 'nominal'
+    let chartInstance = null;
+
+    // Setup API connection to CoinGecko
+    async function fetchLiveBitcoinPrice() {
+      const liveLabel = document.getElementById('liveBtcLabel');
+      try {
+        const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=gbp,usd,eur,aud');
+        if (!response.ok) throw new Error('Network Error');
+        const data = await response.ok ? await response.json() : null;
+        if (data && data.bitcoin) {
+          const priceGbp = data.bitcoin.gbp;
+          const priceUsd = data.bitcoin.usd;
+          const priceEur = data.bitcoin.eur;
+          const priceAud = data.bitcoin.aud;
+          
+          // Cache globally
+          window.btcPrices = { gbp: priceGbp, usd: priceUsd, eur: priceEur, aud: priceAud };
+          updateLiveTicker();
+        }
+      } catch (error) {
+        console.warn('Unable to fetch live Bitcoin price:', error);
+        liveLabel.textContent = 'Live BTC Ticker: Connection paused (Using fallback base estimates)';
+        liveLabel.className = 'text-slate-500';
+      }
+    }
+
+    function updateLiveTicker() {
+      if (!window.btcPrices) return;
+      const symbol = CURRENCIES[activeCurrency].symbol;
+      const code = CURRENCIES[activeCurrency].btcGecko;
+      const price = window.btcPrices[code];
+      
+      if (price) {
+        const formattedPrice = new Intl.NumberFormat(CURRENCIES[activeCurrency].locale, {
+          style: 'currency',
+          currency: activeCurrency,
+          maximumFractionDigits: 0
+        }).format(price);
+
+        // Satoshis calculation
+        const satsPerUnit = (baseCapital / price) * 100000000;
+        const formattedSats = new Intl.NumberFormat(CURRENCIES[activeCurrency].locale, {
+          maximumFractionDigits: 0
+        }).format(satsPerUnit);
+        
+        const liveLabel = document.getElementById('liveBtcLabel');
+        liveLabel.innerHTML = `Live Price: <strong class="text-bitcoin">${formattedPrice}</strong> | Your Starting capital yields <strong class="text-slate-200">${(baseCapital / price).toFixed(4)} BTC</strong> (${formattedSats} Satoshis)`;
+      }
+    }
+
+    function getCurrencyFormatter(maxDigits = 0) {
+      return new Intl.NumberFormat(CURRENCIES[activeCurrency].locale, {
+        style: 'currency',
+        currency: activeCurrency,
+        minimumFractionDigits: 0,
+        maximumFractionDigits: maxDigits
+      });
+    }
+
+    function getNumFormatter() {
+      return new Intl.NumberFormat(CURRENCIES[activeCurrency].locale, {
+        maximumFractionDigits: 0
+      });
+    }
+
+    // Helper to render percentage pill
+    function formatPercentagePill(value) {
+      if (value === 0) return `<span class="text-slate-500 text-[10px] ml-1 font-bold">0%</span>`;
+      const sign = value > 0 ? '+' : '';
+      const color = value > 0 ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : 'text-red-400 bg-red-500/10 border-red-500/20';
+      return `<span class="${color} text-[10px] px-1.5 py-0.5 rounded border font-bold ml-1.5">${sign}${value.toFixed(1)}%</span>`;
+    }
+
+    // Setup UI inputs bindings
+    function bindInputs() {
+      // Global sliders
+      const capSlider = document.getElementById('capitalSlider');
+      const capVal = document.getElementById('capitalAmount');
+      const infSlider = document.getElementById('inflationSlider');
+      const infVal = document.getElementById('inflationRate');
+
+      // Sync capital
+      capSlider.addEventListener('input', (e) => {
+        baseCapital = parseInt(e.target.value);
+        capVal.value = baseCapital;
+        syncSandboxMaxYear();
+        calculateAndRender();
+        updateLiveTicker();
+      });
+      capVal.addEventListener('change', (e) => {
+        let val = parseInt(e.target.value);
+        if (isNaN(val) || val < 100) val = 100;
+        if (val > 1000000) val = 1000000;
+        baseCapital = val;
+        capSlider.value = val;
+        syncSandboxMaxYear();
+        calculateAndRender();
+        updateLiveTicker();
+      });
+
+      // Sync inflation
+      infSlider.addEventListener('input', (e) => {
+        annualInflation = parseFloat(e.target.value) / 100;
+        infVal.value = e.target.value;
+        document.getElementById('debasementTicker').textContent = e.target.value + '%';
+        calculateAndRender();
+      });
+      infVal.addEventListener('change', (e) => {
+        let val = parseFloat(e.target.value);
+        if (isNaN(val) || val < 0.1) val = 0.1;
+        if (val > 25) val = 25;
+        annualInflation = val / 100;
+        infSlider.value = val;
+        document.getElementById('debasementTicker').textContent = val.toFixed(1) + '%';
+        calculateAndRender();
+      });
+
+      // Strategy rates
+      const bankSlider = document.getElementById('bankRateSlider');
+      const bankLabel = document.getElementById('bankRateLabel');
+      bankSlider.addEventListener('input', (e) => {
+        bankRate = parseFloat(e.target.value) / 100;
+        bankLabel.textContent = e.target.value + '% AER';
+        calculateAndRender();
+      });
+
+      const stocksSlider = document.getElementById('stocksRateSlider');
+      const stocksLabel = document.getElementById('stocksRateLabel');
+      stocksSlider.addEventListener('input', (e) => {
+        stocksRate = parseFloat(e.target.value) / 100;
+        stocksLabel.textContent = e.target.value + '% CAGR';
+        calculateAndRender();
+      });
+
+      const btcSlider = document.getElementById('btcRateSlider');
+      const btcLabel = document.getElementById('btcRateLabel');
+      btcSlider.addEventListener('input', (e) => {
+        btcRate = parseFloat(e.target.value) / 100;
+        btcLabel.textContent = e.target.value + '% CAGR';
+        calculateAndRender();
+      });
+
+      // Sandbox Slider
+      const sandboxSlider = document.getElementById('sandboxYearSlider');
+      sandboxSlider.addEventListener('input', (e) => {
+        renderSandbox(parseInt(e.target.value));
+      });
+    }
+
+    function setCurrency(curr) {
+      activeCurrency = curr;
+      // Update buttons
+      ['GBP', 'USD', 'EUR', 'AUD'].forEach(c => {
+        const btn = document.getElementById(`btn-${c}`);
+        if (c === curr) {
+          btn.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-slate-800 text-white border border-slate-700';
+        } else {
+          btn.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-400 hover:text-slate-200';
+        }
+      });
+
+      // Update labels of currency symbol
+      document.querySelectorAll('.currency-symbol').forEach(el => {
+        el.textContent = CURRENCIES[curr].symbol;
+      });
+
+      calculateAndRender();
+      updateLiveTicker();
+    }
+
+    function setTimeHorizon(years) {
+      horizonYears = years;
+      // Update buttons
+      [5, 10, 15, 20].forEach(y => {
+        const btn = document.getElementById(`horizon-${y}`);
+        if (y === years) {
+          btn.className = 'py-2 text-xs font-bold rounded-lg transition-all bg-slate-800 text-white border border-slate-700 shadow';
+        } else {
+          btn.className = 'py-2 text-xs font-bold rounded-lg transition-all text-slate-400 hover:text-white hover:bg-slate-800/50';
+        }
+      });
+
+      syncSandboxMaxYear();
+      calculateAndRender();
+    }
+
+    function syncSandboxMaxYear() {
+      const sandboxSlider = document.getElementById('sandboxYearSlider');
+      sandboxSlider.max = horizonYears;
+      if (parseInt(sandboxSlider.value) > horizonYears) {
+        sandboxSlider.value = horizonYears;
+      }
+      
+      // Render ticks
+      const ticksContainer = document.getElementById('sandboxTickMarks');
+      ticksContainer.innerHTML = '';
+      for (let i = 0; i <= horizonYears; i++) {
+        if (i === 0 || i === horizonYears || i % 5 === 0) {
+          const span = document.createElement('span');
+          span.textContent = `Yr ${i}`;
+          ticksContainer.appendChild(span);
+        } else {
+          const span = document.createElement('span');
+          span.innerHTML = '&bull;';
+          span.className = 'text-slate-700';
+          ticksContainer.appendChild(span);
+        }
+      }
+    }
+
+    function setChartMode(mode) {
+      activeChartMode = mode;
+      const btnReal = document.getElementById('chart-btn-real');
+      const btnNominal = document.getElementById('chart-btn-nominal');
+      
+      if (mode === 'real') {
+        btnReal.className = 'px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all bg-slate-800 text-white border border-slate-700 shadow';
+        btnNominal.className = 'px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all text-slate-400 hover:text-slate-200';
+      } else {
+        btnNominal.className = 'px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all bg-slate-800 text-white border border-slate-700 shadow';
+        btnReal.className = 'px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all text-slate-400 hover:text-slate-200';
+      }
+
+      calculateAndRender();
+    }
+
+    // Core Calculation Engine
+    function computeStrategiesData() {
+      const breadBase = CURRENCIES[activeCurrency].breadDefault;
+      const dataset = [];
+
+      for (let yr = 0; yr <= horizonYears; yr++) {
+        const yearInflationFactor = Math.pow(1 + annualInflation, yr);
+        const breadPrice = breadBase * yearInflationFactor;
+
+        // 1. Mattress
+        const mattressNominal = baseCapital;
+        const mattressReal = mattressNominal / yearInflationFactor;
+        const mattressRealChange = ((mattressReal - baseCapital) / baseCapital) * 100;
+        const mattressBread = mattressReal / breadBase;
+
+        // 2. Savings Account / ISA
+        const bankNominal = baseCapital * Math.pow(1 + bankRate, yr);
+        const bankReal = bankNominal / yearInflationFactor;
+        const bankRealChange = ((bankReal - baseCapital) / baseCapital) * 100;
+        const bankBread = bankReal / breadBase;
+
+        // 3. Stocks (S&P 500)
+        const stocksNominal = baseCapital * Math.pow(1 + stocksRate, yr);
+        const stocksReal = stocksNominal / yearInflationFactor;
+        const stocksRealChange = ((stocksReal - baseCapital) / baseCapital) * 100;
+        const stocksBread = stocksReal / breadBase;
+
+        // 4. Bitcoin
+        const btcNominal = baseCapital * Math.pow(1 + btcRate, yr);
+        const btcReal = btcNominal / yearInflationFactor;
+        const btcRealChange = ((btcReal - baseCapital) / baseCapital) * 100;
+        const btcBread = btcReal / breadBase;
+
+        dataset.push({
+          year: yr,
+          breadPrice,
+          mattress: { nominal: mattressNominal, real: mattressReal, change: mattressRealChange, bread: mattressBread },
+          bank: { nominal: bankNominal, real: bankReal, change: bankRealChange, bread: bankBread },
+          stocks: { nominal: stocksNominal, real: stocksReal, change: stocksRealChange, bread: stocksBread },
+          btc: { nominal: btcNominal, real: btcReal, change: btcRealChange, bread: btcBread }
+        });
+      }
+
+      return dataset;
+    }
+
+    function renderTable(data) {
+      const tbody = document.getElementById('comparisonTableBody');
+      tbody.innerHTML = '';
+      
+      const formatter = getCurrencyFormatter(0);
+      const numFmt = getNumFormatter();
+
+      data.forEach((row) => {
+        const tr = document.createElement('tr');
+        if (row.year === 0) {
+          tr.className = 'bg-slate-900/40 text-slate-300 border-b border-slate-800';
+        } else if (row.year === horizonYears) {
+          tr.className = 'bg-slate-900 text-white border-t-2 border-slate-800 font-bold';
+        } else {
+          tr.className = 'hover:bg-slate-900/20 transition-colors border-b border-slate-800/50';
+        }
+
+        tr.innerHTML = `
+          <td class="px-4 py-3 sticky left-0 bg-slate-950 z-10 font-bold border-r border-slate-800">
+            ${row.year === 0 ? 'Today' : `Year ${row.year}`}
+          </td>
+          
+          <!-- Mattress -->
+          <td class="px-4 py-3 text-red-400 font-semibold bg-slate-950/10">
+            ${formatter.format(row.mattress.real)}
+            ${row.year > 0 ? formatPercentagePill(row.mattress.change) : ''}
+          </td>
+          <td class="px-4 py-3 text-slate-400 border-r border-slate-800/50 bg-slate-950/10">
+            🍞 ${numFmt.format(row.mattress.bread)}
+          </td>
+          
+          <!-- Bank -->
+          <td class="px-4 py-3 text-slate-500 bg-bank/5">
+            ${formatter.format(row.bank.nominal)}
+          </td>
+          <td class="px-4 py-3 bg-bank/5 border-r border-slate-800/50">
+            <div class="flex flex-col">
+              <span class="font-bold ${row.bank.change > 0 ? 'text-emerald-400' : row.bank.change < 0 ? 'text-red-300' : 'text-slate-300'}">
+                ${formatter.format(row.bank.real)}
+                ${row.year > 0 ? formatPercentagePill(row.bank.change) : ''}
+              </span>
+              <span class="text-[10px] text-slate-400 mt-0.5">🍞 ${numFmt.format(row.bank.bread)} loaves</span>
+            </div>
+          </td>
+          
+          <!-- Stocks -->
+          <td class="px-4 py-3 text-slate-500 bg-stocks/5">
+            ${formatter.format(row.stocks.nominal)}
+          </td>
+          <td class="px-4 py-3 bg-stocks/5 border-r border-slate-800/50">
+            <div class="flex flex-col">
+              <span class="font-bold ${row.stocks.change > 0 ? 'text-emerald-400' : 'text-slate-300'}">
+                ${formatter.format(row.stocks.real)}
+                ${row.year > 0 ? formatPercentagePill(row.stocks.change) : ''}
+              </span>
+              <span class="text-[10px] text-slate-400 mt-0.5">🍞 ${numFmt.format(row.stocks.bread)} loaves</span>
+            </div>
+          </td>
+          
+          <!-- BTC -->
+          <td class="px-4 py-3 text-slate-500 bg-bitcoin/5">
+            ${formatter.format(row.btc.nominal)}
+          </td>
+          <td class="px-4 py-3 bg-bitcoin/5">
+            <div class="flex flex-col">
+              <span class="font-bold text-bitcoin">
+                ${formatter.format(row.btc.real)}
+                ${row.year > 0 ? formatPercentagePill(row.btc.change) : ''}
+              </span>
+              <span class="text-[10px] text-slate-200 font-semibold mt-0.5">🍞 ${numFmt.format(row.btc.bread)} loaves</span>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderSandbox(selectedYear) {
+      const data = computeStrategiesData();
+      const row = data.find(r => r.year === selectedYear) || data[0];
+      
+      document.getElementById('sandboxSelectedYearLabel').textContent = selectedYear;
+      const formatter = getCurrencyFormatter(0);
+      const floatFormatter = getCurrencyFormatter(2);
+      const numFmt = getNumFormatter();
+
+      // 1. Mattress
+      document.getElementById('sandboxCashVal').textContent = formatter.format(row.mattress.real);
+      const cashLoss = document.getElementById('sandboxCashLoss');
+      cashLoss.innerHTML = selectedYear > 0 ? `Loss: ${row.mattress.change.toFixed(1)}%` : 'Baseline';
+      cashLoss.className = selectedYear > 0 ? 'text-[11px] text-red-400 font-semibold' : 'text-[11px] text-slate-400 font-semibold';
+      document.getElementById('sandboxCashBreadPrice').textContent = floatFormatter.format(row.breadPrice);
+      document.getElementById('sandboxCashBreadCount').textContent = numFmt.format(row.mattress.bread);
+
+      // 2. Bank Savings
+      document.getElementById('sandboxBankVal').textContent = formatter.format(row.bank.real);
+      const bankRealLabel = document.getElementById('sandboxBankReal');
+      if (selectedYear > 0) {
+        const color = row.bank.change >= 0 ? 'text-emerald-400' : 'text-red-400';
+        bankRealLabel.innerHTML = `Real PP: ${formatter.format(row.bank.real)} <span class="${color} ml-1">${row.bank.change > 0 ? '+' : ''}${row.bank.change.toFixed(1)}%</span>`;
+      } else {
+        bankRealLabel.textContent = 'Baseline';
+      }
+      document.getElementById('sandboxBankNominal').textContent = formatter.format(row.bank.nominal);
+      document.getElementById('sandboxBankBreadCount').textContent = numFmt.format(row.bank.bread);
+      
+      // 3. Index Fund
+      document.getElementById('sandboxStocksVal').textContent = formatter.format(row.stocks.real);
+      const stocksRealLabel = document.getElementById('sandboxStocksReal');
+      if (selectedYear > 0) {
+        const color = row.stocks.change >= 0 ? 'text-emerald-400' : 'text-red-400';
+        stocksRealLabel.innerHTML = `Real PP: ${formatter.format(row.stocks.real)} <span class="${color} ml-1">${row.stocks.change > 0 ? '+' : ''}${row.stocks.change.toFixed(1)}%</span>`;
+      } else {
+        stocksRealLabel.textContent = 'Baseline';
+      }
+      document.getElementById('sandboxStocksNominal').textContent = formatter.format(row.stocks.nominal);
+      document.getElementById('sandboxStocksBreadCount').textContent = numFmt.format(row.stocks.bread);
+
+      // 4. Bitcoin
+      document.getElementById('sandboxBtcVal').textContent = formatter.format(row.btc.real);
+      const btcRealLabel = document.getElementById('sandboxBtcReal');
+      if (selectedYear > 0) {
+        const color = row.btc.change >= 0 ? 'text-emerald-400' : 'text-red-400';
+        btcRealLabel.innerHTML = `Real PP: ${formatter.format(row.btc.real)} <span class="${color} ml-1">${row.btc.change > 0 ? '+' : ''}${row.btc.change.toFixed(1)}%</span>`;
+      } else {
+        btcRealLabel.textContent = 'Baseline';
+      }
+      document.getElementById('sandboxBtcNominal').textContent = formatter.format(row.btc.nominal);
+      document.getElementById('sandboxBtcBreadCount').textContent = numFmt.format(row.btc.bread);
+    }
+
+    function renderChart(data) {
+      const ctx = document.getElementById('savingsChart').getContext('2d');
+      
+      const labels = data.map(r => r.year === 0 ? 'Today' : `Year ${r.year}`);
+      
+      const datasetMattress = [];
+      const datasetBank = [];
+      const datasetStocks = [];
+      const datasetBtc = [];
+
+      data.forEach(row => {
+        if (activeChartMode === 'real') {
+          datasetMattress.push(row.mattress.real);
+          datasetBank.push(row.bank.real);
+          datasetStocks.push(row.stocks.real);
+          datasetBtc.push(row.btc.real);
+        } else {
+          datasetMattress.push(row.mattress.nominal);
+          datasetBank.push(row.bank.nominal);
+          datasetStocks.push(row.stocks.nominal);
+          datasetBtc.push(row.btc.nominal);
+        }
+      });
+
+      const config = {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Cash Mattress',
+              data: datasetMattress,
+              borderColor: '#6B7280',
+              backgroundColor: 'rgba(107, 114, 128, 0.1)',
+              borderWidth: 2.5,
+              pointBackgroundColor: '#6B7280',
+              tension: 0.2
+            },
+            {
+              label: 'Bank Savings',
+              data: datasetBank,
+              borderColor: '#3B82F6',
+              backgroundColor: 'rgba(59, 130, 246, 0.1)',
+              borderWidth: 3,
+              pointBackgroundColor: '#3B82F6',
+              tension: 0.2
+            },
+            {
+              label: 'Index Fund (S&P 500)',
+              data: datasetStocks,
+              borderColor: '#10B981',
+              backgroundColor: 'rgba(16, 185, 129, 0.1)',
+              borderWidth: 3,
+              pointBackgroundColor: '#10B981',
+              tension: 0.2
+            },
+            {
+              label: 'Bitcoin (Hard Money)',
+              data: datasetBtc,
+              borderColor: '#F7931A',
+              backgroundColor: 'rgba(247, 147, 26, 0.1)',
+              borderWidth: 4,
+              pointBackgroundColor: '#F7931A',
+              tension: 0.2
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: {
+                color: '#94a3b8',
+                font: {
+                  family: 'Plus Jakarta Sans',
+                  weight: 'bold',
+                  size: 11
+                },
+                padding: 20
+              }
+            },
+            tooltip: {
+              backgroundColor: '#0f172a',
+              titleColor: '#fff',
+              bodyColor: '#94a3b8',
+              borderColor: '#334155',
+              borderWidth: 1,
+              titleFont: { family: 'Outfit', weight: 'bold' },
+              bodyFont: { family: 'Plus Jakarta Sans' },
+              padding: 12,
+              callbacks: {
+                label: function(context) {
+                  const value = context.raw;
+                  const formatter = getCurrencyFormatter(0);
+                  return ` ${context.dataset.label}: ${formatter.format(value)}`;
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              grid: {
+                color: '#1e293b'
+              },
+              ticks: {
+                color: '#94a3b8',
+                font: { family: 'Plus Jakarta Sans', size: 10 },
+                callback: function(value) {
+                  const formatter = getCurrencyFormatter(0);
+                  return formatter.format(value);
+                }
+              }
+            },
+            x: {
+              grid: {
+                color: 'rgba(30, 41, 59, 0.3)'
+              },
+              ticks: {
+                color: '#94a3b8',
+                font: { family: 'Plus Jakarta Sans', size: 10 }
+              }
+            }
+          }
+        }
+      };
+
+      if (chartInstance) {
+        chartInstance.destroy();
+      }
+      chartInstance = new Chart(ctx, config);
+    }
+
+    function calculateAndRender() {
+      const data = computeStrategiesData();
+      renderTable(data);
+      renderSandbox(parseInt(document.getElementById('sandboxYearSlider').value));
+      renderChart(data);
+    }
+
+    // Bootstrapping
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      bindInputs();
+      syncSandboxMaxYear();
+      calculateAndRender();
+
+      // Call API with delay to avoid rate limits
+      setTimeout(() => {
+        fetchLiveBitcoinPrice();
+      }, 500);
+
+      // Auto-refresh live data every 60 seconds
+      setInterval(fetchLiveBitcoinPrice, 60000);
+    });
+  </script>
+</body>
+
+</html>
